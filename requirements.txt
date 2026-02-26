@@ -1,0 +1,4 @@
+# Python dependencies for ClaimsNOW
+# AWS SDK and related services
+# FastAPI backend
+# Data processing utilities

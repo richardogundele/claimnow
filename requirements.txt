@@ -1,71 +1,115 @@
 # =============================================================================
-# ClaimsNOW - Python Dependencies
+# ClaimsNOW v2 - Local ML Dependencies
 # =============================================================================
-# This file lists all Python packages required to run the ClaimsNOW application.
-# Install with: pip install -r requirements.txt
+# No cloud services - everything runs locally
 # =============================================================================
 
 # -----------------------------------------------------------------------------
-# AWS SDK - For interacting with AWS services
+# LangChain - LLM Application Framework
 # -----------------------------------------------------------------------------
-# boto3: The official AWS SDK for Python
-# Used for: S3 (file storage), Textract (OCR), DynamoDB (database), Bedrock (AI)
-boto3>=1.34.0
+# LangChain provides the structure for building LLM apps:
+# - Chains: sequence of calls (parse -> extract -> score)
+# - Agents: LLM decides which tools to use
+# - Memory: conversation history
+# - Retrievers: interface to vector stores
+langchain>=0.1.0
+langchain-community>=0.0.20
 
 # -----------------------------------------------------------------------------
-# Web Framework - FastAPI for building the REST API
+# Vector Database - ChromaDB
 # -----------------------------------------------------------------------------
-# fastapi: Modern, fast web framework for building APIs
-# Used for: Creating REST endpoints (/analyse, /health, /claims)
+# ChromaDB stores embeddings and enables similarity search
+# Used for RAG: find similar market rates to compare against
+chromadb>=0.4.22
+
+# -----------------------------------------------------------------------------
+# Embeddings - Sentence Transformers
+# -----------------------------------------------------------------------------
+# Creates vector embeddings from text locally
+# No OpenAI API needed - runs entirely on your machine
+sentence-transformers>=2.3.0
+
+# -----------------------------------------------------------------------------
+# Document Parsing - PDF Text Extraction
+# -----------------------------------------------------------------------------
+# PyMuPDF (fitz): Fast PDF text extraction
+# pdfplumber: Better table extraction
+# Both run locally, no AWS Textract needed
+pymupdf>=1.23.0
+pdfplumber>=0.10.0
+
+# -----------------------------------------------------------------------------
+# OCR - Optical Character Recognition (optional)
+# -----------------------------------------------------------------------------
+# For scanned PDFs that don't have text layer
+# Requires Tesseract installed on system
+pytesseract>=0.3.10
+Pillow>=10.0.0
+
+# -----------------------------------------------------------------------------
+# Machine Learning - scikit-learn
+# -----------------------------------------------------------------------------
+# Classic ML algorithms: classifiers, preprocessing, metrics
+# Used for: claim scoring model, feature engineering
+scikit-learn>=1.4.0
+
+# -----------------------------------------------------------------------------
+# Deep Learning - PyTorch
+# -----------------------------------------------------------------------------
+# Neural network framework
+# Used for: custom models, fine-tuning (if needed)
+torch>=2.1.0
+
+# -----------------------------------------------------------------------------
+# Explainability - SHAP
+# -----------------------------------------------------------------------------
+# SHapley Additive exPlanations
+# Shows WHY the model made each prediction
+# Critical for insurance - decisions must be explainable
+shap>=0.44.0
+
+# -----------------------------------------------------------------------------
+# Data Processing
+# -----------------------------------------------------------------------------
+# pandas: DataFrames for structured data
+# numpy: Numerical arrays
+pandas>=2.1.0
+numpy>=1.26.0
+
+# -----------------------------------------------------------------------------
+# API Framework - FastAPI
+# -----------------------------------------------------------------------------
+# Modern async web framework for Python
+# Automatic OpenAPI documentation
 fastapi>=0.109.0
 
-# uvicorn: ASGI server to run FastAPI applications
-# Used for: Running the API server in development and production
+# uvicorn: ASGI server to run FastAPI
 uvicorn>=0.27.0
 
-# python-multipart: Required for FastAPI file uploads
-# Used for: Handling PDF file uploads in the /analyse endpoint
+# python-multipart: Required for file uploads
 python-multipart>=0.0.6
 
 # -----------------------------------------------------------------------------
-# Data Validation - Pydantic for type-safe data models
+# Configuration & Utilities
 # -----------------------------------------------------------------------------
-# pydantic: Data validation using Python type annotations
-# Used for: Defining request/response schemas, validating extracted data
+# pydantic: Data validation
+# python-dotenv: Load .env files
 pydantic>=2.5.0
-
-# pydantic-settings: Settings management with environment variables
-# Used for: Loading configuration from .env files
 pydantic-settings>=2.1.0
-
-# -----------------------------------------------------------------------------
-# Environment Management
-# -----------------------------------------------------------------------------
-# python-dotenv: Load environment variables from .env files
-# Used for: Managing AWS credentials and config without hardcoding
 python-dotenv>=1.0.0
 
-# -----------------------------------------------------------------------------
-# Date/Time Handling
-# -----------------------------------------------------------------------------
-# python-dateutil: Powerful date parsing and manipulation
-# Used for: Parsing hire dates from documents (various formats)
+# Date parsing
 python-dateutil>=2.8.2
 
 # -----------------------------------------------------------------------------
-# Testing Framework
+# HTTP Client
 # -----------------------------------------------------------------------------
-# pytest: Testing framework for Python
-# Used for: Running unit tests in /tests folder
-pytest>=7.4.0
-
-# pytest-asyncio: Async test support for pytest
-# Used for: Testing async FastAPI endpoints
-pytest-asyncio>=0.23.0
-
-# -----------------------------------------------------------------------------
-# Development Tools (Optional but Recommended)
-# -----------------------------------------------------------------------------
-# httpx: Async HTTP client for testing FastAPI
-# Used for: Making test requests to API endpoints
+# For calling Ollama API
 httpx>=0.26.0
+requests>=2.31.0
+
+# -----------------------------------------------------------------------------
+# Testing
+# -----------------------------------------------------------------------------
+pytest>=7.4.0
+pytest-asyncio>=0.23.0

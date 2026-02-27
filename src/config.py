@@ -183,10 +183,12 @@ class Settings(BaseSettings):
         env_file: Load variables from .env file
         env_file_encoding: Use UTF-8 encoding
         case_sensitive: OLLAMA_MODEL and ollama_model are different
+        extra: ignore unknown env vars (like old AWS settings)
         """
         env_file = ".env"
         env_file_encoding = "utf-8"
         case_sensitive = False
+        extra = "ignore"  # Ignore extra env vars not defined in Settings
 
 
 # -----------------------------------------------------------------------------

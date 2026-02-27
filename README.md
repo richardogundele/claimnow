@@ -55,7 +55,7 @@ ClaimsNOW is built as a **five-layer pipeline**. Each layer is independently tes
 
 ### 2.1 Architecture Layers
 
-| Layer | Component | Responsibility |
+| Layer | Component | Responsibility | 
 |-------|-----------|----------------|
 | **L1** | Document Ingestion | Accept PDF/image input, extract raw text via PyMuPDF or pdfplumber, handle scanned docs via Tesseract OCR |
 | **L2** | NLP Extraction Agent | Parse extracted text using spaCy + regex patterns + Claude API to identify structured fields: hire dates, rates, vehicle type, claimant details |
@@ -275,7 +275,6 @@ The core pattern of ClaimsNOW—ingest document, extract structure, compare agai
 
 ---
 
-
 ## Contact
 
 **Richard Ademola Ogundele**
@@ -295,7 +294,6 @@ The core pattern of ClaimsNOW—ingest document, extract structure, compare agai
 | **Live Demo** | *[Coming Soon]* |
 | **Architecture Docs** | *[Coming Soon]* |
 
----
 
 **Stack:** Python | spaCy | Claude API | FastAPI | React | SQLite  
 **Features:** Document AI | NLP Extraction | Rate Comparison | Explainability

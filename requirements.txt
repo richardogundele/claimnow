@@ -1,4 +1,71 @@
-# Python dependencies for ClaimsNOW
-# AWS SDK and related services
-# FastAPI backend
-# Data processing utilities
+# =============================================================================
+# ClaimsNOW - Python Dependencies
+# =============================================================================
+# This file lists all Python packages required to run the ClaimsNOW application.
+# Install with: pip install -r requirements.txt
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# AWS SDK - For interacting with AWS services
+# -----------------------------------------------------------------------------
+# boto3: The official AWS SDK for Python
+# Used for: S3 (file storage), Textract (OCR), DynamoDB (database), Bedrock (AI)
+boto3>=1.34.0
+
+# -----------------------------------------------------------------------------
+# Web Framework - FastAPI for building the REST API
+# -----------------------------------------------------------------------------
+# fastapi: Modern, fast web framework for building APIs
+# Used for: Creating REST endpoints (/analyse, /health, /claims)
+fastapi>=0.109.0
+
+# uvicorn: ASGI server to run FastAPI applications
+# Used for: Running the API server in development and production
+uvicorn>=0.27.0
+
+# python-multipart: Required for FastAPI file uploads
+# Used for: Handling PDF file uploads in the /analyse endpoint
+python-multipart>=0.0.6
+
+# -----------------------------------------------------------------------------
+# Data Validation - Pydantic for type-safe data models
+# -----------------------------------------------------------------------------
+# pydantic: Data validation using Python type annotations
+# Used for: Defining request/response schemas, validating extracted data
+pydantic>=2.5.0
+
+# pydantic-settings: Settings management with environment variables
+# Used for: Loading configuration from .env files
+pydantic-settings>=2.1.0
+
+# -----------------------------------------------------------------------------
+# Environment Management
+# -----------------------------------------------------------------------------
+# python-dotenv: Load environment variables from .env files
+# Used for: Managing AWS credentials and config without hardcoding
+python-dotenv>=1.0.0
+
+# -----------------------------------------------------------------------------
+# Date/Time Handling
+# -----------------------------------------------------------------------------
+# python-dateutil: Powerful date parsing and manipulation
+# Used for: Parsing hire dates from documents (various formats)
+python-dateutil>=2.8.2
+
+# -----------------------------------------------------------------------------
+# Testing Framework
+# -----------------------------------------------------------------------------
+# pytest: Testing framework for Python
+# Used for: Running unit tests in /tests folder
+pytest>=7.4.0
+
+# pytest-asyncio: Async test support for pytest
+# Used for: Testing async FastAPI endpoints
+pytest-asyncio>=0.23.0
+
+# -----------------------------------------------------------------------------
+# Development Tools (Optional but Recommended)
+# -----------------------------------------------------------------------------
+# httpx: Async HTTP client for testing FastAPI
+# Used for: Making test requests to API endpoints
+httpx>=0.26.0

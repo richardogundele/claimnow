@@ -26,7 +26,8 @@ from dataclasses import dataclass
 import numpy as np
 from sentence_transformers import SentenceTransformer
 
-from config import settings
+# Import from sibling modules using package-relative imports
+from src.config import settings
 
 # Set up logging
 logger = logging.getLogger(__name__)

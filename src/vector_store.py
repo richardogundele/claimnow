@@ -34,8 +34,9 @@ from dataclasses import dataclass, field
 import chromadb
 from chromadb.config import Settings as ChromaSettings
 
-from config import settings, get_absolute_path
-from embeddings import get_embedding_model, EmbeddingModel
+# Import from sibling modules using package-relative imports
+from src.config import settings, get_absolute_path
+from src.embeddings import get_embedding_model, EmbeddingModel
 
 # Set up logging
 logger = logging.getLogger(__name__)

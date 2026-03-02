@@ -27,7 +27,8 @@ from dataclasses import dataclass
 
 import httpx
 
-from config import settings
+# Import from sibling modules using package-relative imports
+from src.config import settings
 
 # Set up logging
 logger = logging.getLogger(__name__)

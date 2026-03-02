@@ -34,9 +34,10 @@ from dataclasses import dataclass, field
 import numpy as np
 import shap
 
-from scorer import ClaimScorer, ScoringFeatures, ScoringResult, Verdict, get_scorer
-from extractor import ExtractedClaim
-from rate_matcher import RateMatchResult
+# Import from sibling modules using package-relative imports
+from src.scorer import ClaimScorer, ScoringFeatures, ScoringResult, Verdict, get_scorer
+from src.extractor import ExtractedClaim
+from src.rate_matcher import RateMatchResult
 
 # Set up logging
 logger = logging.getLogger(__name__)

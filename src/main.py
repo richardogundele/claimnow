@@ -31,11 +31,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
-from config import settings, ensure_directories
-from pipeline import ClaimsPipeline, AnalysisResult, analyze_claim, analyze_claim_text
-from rag_pipeline import RAGPipeline, rag_query
-from vector_store import get_rates_store
-from llm_client import get_llm_client
+# Import from sibling modules using relative imports
+# The '.' means "current package" - required when running as a module
+from src.config import settings, ensure_directories
+from src.pipeline import ClaimsPipeline, AnalysisResult, analyze_claim, analyze_claim_text
+from src.rag_pipeline import RAGPipeline, rag_query
+from src.vector_store import get_rates_store
+from src.llm_client import get_llm_client
 
 # Set up logging
 logging.basicConfig(

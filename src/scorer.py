@@ -47,9 +47,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, accuracy_score
 import pandas as pd
 
-from extractor import ExtractedClaim
-from rate_matcher import RateMatchResult, RateComparison
-from config import settings, get_absolute_path
+# Import from sibling modules using package-relative imports
+from src.extractor import ExtractedClaim
+from src.rate_matcher import RateMatchResult, RateComparison
+from src.config import settings, get_absolute_path
 
 # Set up logging
 logger = logging.getLogger(__name__)

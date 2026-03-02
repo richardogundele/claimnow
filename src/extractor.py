@@ -34,8 +34,9 @@ from dataclasses import dataclass, field
 from datetime import datetime, date
 from dateutil import parser as date_parser
 
-from llm_client import OllamaClient, get_llm_client
-from config import settings
+# Import from sibling modules using package-relative imports
+from src.llm_client import OllamaClient, get_llm_client
+from src.config import settings
 
 # Set up logging
 logger = logging.getLogger(__name__)

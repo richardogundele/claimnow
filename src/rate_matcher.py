@@ -33,9 +33,10 @@ from dataclasses import dataclass, field
 from statistics import mean, median, stdev
 from enum import Enum
 
-from vector_store import VectorStore, get_rates_store, SearchResult
-from extractor import ExtractedClaim
-from config import settings
+# Import from sibling modules using package-relative imports
+from src.vector_store import VectorStore, get_rates_store, SearchResult
+from src.extractor import ExtractedClaim
+from src.config import settings
 
 # Set up logging
 logger = logging.getLogger(__name__)

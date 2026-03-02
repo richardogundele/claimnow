@@ -27,9 +27,10 @@ import logging
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, field
 
-from llm_client import OllamaClient, get_llm_client, Message
-from vector_store import VectorStore, get_rates_store, SearchResult
-from config import settings
+# Import from sibling modules using package-relative imports
+from src.llm_client import OllamaClient, get_llm_client, Message
+from src.vector_store import VectorStore, get_rates_store, SearchResult
+from src.config import settings
 
 # Set up logging
 logger = logging.getLogger(__name__)

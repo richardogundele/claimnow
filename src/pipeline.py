@@ -35,12 +35,14 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 
-from document_parser import DocumentParser, DocumentContent, parse_document
-from extractor import ClaimExtractor, ExtractedClaim, extract_claim
-from rate_matcher import RateMatcher, RateMatchResult, match_rate, RateComparison
-from scorer import ClaimScorer, ScoringResult, Verdict, score_claim
-from explainer import ClaimExplainer, Explanation, explain_score
-from config import settings
+# Import from sibling modules using package-relative imports
+# 'src.' prefix required when running from project root
+from src.document_parser import DocumentParser, DocumentContent, parse_document
+from src.extractor import ClaimExtractor, ExtractedClaim, extract_claim
+from src.rate_matcher import RateMatcher, RateMatchResult, match_rate, RateComparison
+from src.scorer import ClaimScorer, ScoringResult, Verdict, score_claim
+from src.explainer import ClaimExplainer, Explanation, explain_score
+from src.config import settings
 
 # Set up logging
 logger = logging.getLogger(__name__)

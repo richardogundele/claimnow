@@ -34,8 +34,9 @@ import numpy as np
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
 
-from vector_store import get_rates_store, VectorStore
-from config import settings, get_absolute_path
+# Import from sibling modules using package-relative imports
+from src.vector_store import get_rates_store, VectorStore
+from src.config import settings, get_absolute_path
 
 # Set up logging
 logging.basicConfig(

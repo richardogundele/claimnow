@@ -3,15 +3,14 @@
 **AI-Powered Motor Insurance Court Pack Analyser**  
 **Using Local ML, RAG, and Fine-tuned LLMs - No Cloud Dependencies**
 
-> Built for the Whichrate KTP Associate Role  
+ 
 > Author: Richard Ademola Ogundele  
-> MSc Artificial Intelligence
 
 ---
 
 ## What This Project Demonstrates
 
-| KTP Requirement | How This Project Shows It |
+|  Requirement | How This Project Shows It |
 |-----------------|---------------------------|
 | RAG pipelines for specific domains | ChromaDB + LangChain for rate retrieval |
 | Fine-tune LLMs for enhanced performance | Local Mistral/Llama with domain prompts |

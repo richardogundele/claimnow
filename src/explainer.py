@@ -31,9 +31,6 @@ import logging
 from typing import Optional, Dict, Any, List, Tuple
 from dataclasses import dataclass, field
 
-import numpy as np
-import shap
-
 # Import from sibling modules using package-relative imports
 from src.scorer import ClaimScorer, ScoringFeatures, ScoringResult, Verdict, get_scorer
 from src.extractor import ExtractedClaim
@@ -161,62 +158,9 @@ class ClaimExplainer:
             scorer: The scorer to explain (default: global scorer)
         """
         self.scorer = scorer or get_scorer()
-        self._shap_explainer: Optional[shap.Explainer] = None
         
-        # Initialize SHAP explainer if model is available
-        if self.scorer.model is not None:
-            self._init_shap_explainer()
-        
-        logger.info("ClaimExplainer initialized")
-    
-    def _init_shap_explainer(self):
-        """
-        Initialize the SHAP explainer with background data.
-        
-        SHAP needs a "background" dataset to compute expected values.
-        We create synthetic background data representing typical claims.
-        """
-        try:
-            # Create background data (100 samples)
-            np.random.seed(42)
-            n_background = 100
-            
-            background_data = np.array([
-                [
-                    np.random.uniform(-20, 50),   # rate_deviation_percent
-                    np.random.uniform(-10, 30),   # rate_deviation_amount
-                    np.random.uniform(40, 100),   # claimed_rate
-                    np.random.uniform(40, 60),    # market_mean_rate
-                    np.random.randint(3, 20),     # market_rate_count
-                    np.random.randint(3, 30),     # hire_duration_days
-                    np.random.uniform(0.5, 1.0),  # extraction_confidence
-                    np.random.randint(0, 9),      # vehicle_group_encoded
-                    np.random.choice([0, 1]),     # has_region_match
-                    np.random.choice([0, 1])      # has_sufficient_comparables
-                ]
-                for _ in range(n_background)
-            ])
-            
-            # Scale background data
-            if self.scorer.scaler is not None:
-                background_scaled = self.scorer.scaler.transform(background_data)
-            else:
-                background_scaled = background_data
-            
-            # Create SHAP explainer
-            # TreeExplainer is optimized for tree-based models (like GradientBoosting)
-            self._shap_explainer = shap.TreeExplainer(
-                self.scorer.model,
-                background_scaled,
-                feature_perturbation="interventional"
-            )
-            
-            logger.info("SHAP explainer initialized")
-            
-        except Exception as e:
-            logger.warning(f"Could not initialize SHAP explainer: {e}")
-            self._shap_explainer = None
-    
+        logger.info("ClaimExplainer initialized (RAG-based)")
+
     def explain(
         self,
         scoring_result: ScoringResult,
@@ -226,7 +170,7 @@ class ClaimExplainer:
         """
         Generate explanation for a scoring result.
         
-        This is the MAIN METHOD.
+        This uses the reasoning and evidence from RAG-based scoring.
         
         Args:
             scoring_result: The scoring result to explain
@@ -234,137 +178,60 @@ class ClaimExplainer:
             rate_result: Rate matching result (for context)
             
         Returns:
-            Explanation with SHAP values and human summary
+            Explanation with reasoning and evidence highlights
         """
         explanation = Explanation(
             verdict=scoring_result.verdict,
             confidence=scoring_result.confidence
         )
         
-        # Get SHAP values if explainer is available
-        if self._shap_explainer is not None:
-            try:
-                shap_explanation = self._compute_shap_values(scoring_result.features)
-                explanation = self._build_explanation(
-                    shap_explanation,
-                    scoring_result.features,
-                    scoring_result.verdict,
-                    scoring_result.confidence
-                )
-            except Exception as e:
-                logger.warning(f"SHAP computation failed: {e}")
-                # Fall back to feature importance from model
-                explanation = self._build_fallback_explanation(
-                    scoring_result
-                )
-        else:
-            # No SHAP, use model feature importance
-            explanation = self._build_fallback_explanation(scoring_result)
+        # Build explanation from RAG reasoning and evidence
+        explanation = self._build_rag_explanation(scoring_result)
         
         # Add context from claim and rate result
         explanation = self._add_context(explanation, claim, rate_result)
         
         return explanation
     
-    def _compute_shap_values(
-        self,
-        features: ScoringFeatures
-    ) -> shap.Explanation:
+    def _build_rag_explanation(self, scoring_result: ScoringResult) -> Explanation:
         """
-        Compute SHAP values for the given features.
+        Build explanation from RAG-based scoring results.
+        
+        Uses LLM reasoning and evidence directly instead of SHAP.
         """
-        # Convert features to array
-        X = features.to_array()
-        
-        # Scale if scaler is available
-        if self.scorer.scaler is not None:
-            X_scaled = self.scorer.scaler.transform(X)
-        else:
-            X_scaled = X
-        
-        # Compute SHAP values
-        shap_values = self._shap_explainer(X_scaled)
-        
-        return shap_values
-    
-    def _build_explanation(
-        self,
-        shap_explanation: shap.Explanation,
-        features: ScoringFeatures,
-        verdict: Verdict,
-        confidence: float
-    ) -> Explanation:
-        """
-        Build Explanation object from SHAP values.
-        """
-        # Get feature names and values
-        feature_names = features.feature_names()
-        feature_values = features.to_array()[0]
-        
-        # SHAP values are per-class for multi-class models
-        # Shape: (n_samples, n_features, n_classes)
-        shap_vals = shap_explanation.values[0]  # First sample
-        
-        # For the predicted class
-        class_idx = self.scorer.CLASSES.index(verdict) if verdict in self.scorer.CLASSES else 0
-        
-        # Get SHAP values for predicted class
-        if len(shap_vals.shape) > 1:
-            # Multi-class: shap_vals is (n_features, n_classes)
-            class_shap = shap_vals[:, class_idx]
-        else:
-            # Binary or single output
-            class_shap = shap_vals
-        
-        # Build contributions
-        contributions = []
-        for i, (name, value, shap_val) in enumerate(zip(
-            feature_names, feature_values, class_shap
-        )):
-            contributions.append(FeatureContribution(
-                feature_name=self.FEATURE_LABELS.get(name, name),
-                feature_value=self._format_feature_value(name, value),
-                shap_value=float(shap_val),
-                direction="positive" if shap_val > 0 else "negative"
-            ))
-        
-        # Sort by absolute SHAP value
-        contributions.sort(key=lambda c: abs(c.shap_value), reverse=True)
-        
-        # Add importance rank
-        for i, contrib in enumerate(contributions):
-            contrib.importance_rank = i + 1
-        
-        # Get top positive and negative factors
-        top_positive = [
-            c.feature_name for c in contributions
-            if c.shap_value > 0.01
-        ][:3]
-        
-        top_negative = [
-            c.feature_name for c in contributions
-            if c.shap_value < -0.01
-        ][:3]
-        
-        # Base value
-        base_value = float(shap_explanation.base_values[0])
-        if isinstance(base_value, np.ndarray):
-            base_value = float(base_value[class_idx])
-        
-        # Generate summary
-        summary = self._generate_summary(verdict, contributions, confidence)
-        detailed = self._generate_detailed_explanation(verdict, contributions)
-        
-        return Explanation(
-            verdict=verdict,
-            confidence=confidence,
-            contributions=contributions,
-            base_value=base_value,
-            summary=summary,
-            detailed_explanation=detailed,
-            top_positive_factors=top_positive,
-            top_negative_factors=top_negative
+        explanation = Explanation(
+            verdict=scoring_result.verdict,
+            confidence=scoring_result.confidence
         )
+        
+        # Use LLM reasoning from scoring result
+        if scoring_result.reasoning and scoring_result.reasoning.get('llm_analysis'):
+            explanation.summary = scoring_result.reasoning['llm_analysis']
+        
+        # Build feature contributions from evidence
+        contributions = []
+        if scoring_result.evidence_sources:
+            for idx, source in enumerate(scoring_result.evidence_sources, 1):
+                contribution = FeatureContribution(
+                    feature=f"Market Rate #{idx}",
+                    value=source.daily_rate,
+                    importance=source.similarity_score,  # Use similarity as importance
+                    direction="positive" if source.impact_on_verdict == "supports" else "negative"
+                )
+                contributions.append(contribution)
+        
+        explanation.feature_contributions = contributions
+        
+        # Add key features comparison
+        if scoring_result.reasoning:
+            features = scoring_result.reasoning.get('key_features', {})
+            explanation.summary = (
+                f"{explanation.summary or ''} "
+                f"Claimed rate: £{features.get('claimed_rate', 'N/A')}/day, "
+                f"Market average: £{features.get('market_mean_rate', 'N/A')}/day"
+            ).strip()
+        
+        return explanation
     
     def _build_fallback_explanation(
         self,

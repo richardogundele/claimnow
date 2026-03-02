@@ -3,7 +3,9 @@
 **AI-Powered Motor Insurance Court Pack Analyser**  
 **Using Local ML, RAG, and Fine-tuned LLMs - No Cloud Dependencies**
 
- 
+**Status**: In active development (local-first prototype, open to collaboration)  
+**One-line summary**: End-to-end, five-layer document AI pipeline that ingests motor insurance court packs as PDFs, extracts structured claim data, compares them to a local market rate base via RAG, scores fairness with an ML model, and returns SHAP-backed, regulator-friendly explanations – all running entirely on your own machine.
+
 > Author: Richard Ademola Ogundele  
 
 ---
@@ -60,6 +62,14 @@ PDF Upload
 │  Human-readable reasoning for every decision               │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## Agentic Orchestration & Integrations
+
+- **Multi-layer agentic pipeline**: ClaimNow already behaves like a domain-specific agentic system – with distinct stages for parsing, extraction, RAG, scoring, and explanation that pass structured state between them.
+- **Exploring orchestration frameworks**: Actively exploring integration with agentic orchestration frameworks (e.g. AdenHQ’s Hive, LangGraph, and similar tools) so the same pipeline can be expressed as an explicit, inspectable set of cooperating agents.
+- **Why this matters**: Makes it easier to plug ClaimNow into larger digital workforces (claims triage, litigation support, SIU workflows) and to reuse the architecture for adjacent domains like credit hire, subrogation, or legal document review.
 
 ---
 
@@ -287,5 +297,4 @@ FastAPI endpoints for the frontend to call.
 
 **Richard Ademola Ogundele**  
 Email: Ogundelerichard27@gmail.com  
-LinkedIn: linkedin.com/in/richardogundele  
-BCS Professional Member #995140023
+

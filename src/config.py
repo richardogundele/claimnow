@@ -1,16 +1,16 @@
 """
-config.py - Central Configuration for ClaimsNOW
+config.py - All the Rules for ClaimsNOW
 
 WHY THIS FILE EXISTS:
-- All settings in ONE place (no magic numbers scattered in code)
-- Easy to change settings without editing business logic
-- Environment variables for sensitive data (API keys, paths)
-- Pydantic validates settings automatically
+- Put all the rules in one spot so we find them easy
+- Change the rules without changing the brain code
+- Keep secret stuff (like passwords) as special notes
+- The program checks all the rules are right by itself
 
-WHAT PYDANTIC DOES:
-- BaseSettings loads values from environment variables
-- Validates types (ensures PORT is an int, not a string)
-- Provides defaults when env vars are missing
+WHAT THE HELPER DOES:
+- Reads special notes from outside the program
+- Checks that numbers are numbers and words are words
+- Uses what we tell it if we don't leave notes
 """
 
 import os
@@ -22,140 +22,140 @@ from pydantic import Field
 
 class Settings(BaseSettings):
     """
-    Application settings loaded from environment variables.
+    All the rules that tell the program what to do.
     
     HOW IT WORKS:
-    1. Pydantic looks for environment variables matching field names
-    2. If found, uses the env var value
-    3. If not found, uses the default value specified here
-    4. Type conversion is automatic (e.g., "8000" -> 8000 for int fields)
+    1. Look for special notes with the same name as our rules
+    2. If we find a note, use that number or word
+    3. If we don't find a note, use what we wrote here
+    4. Change it to the right type by itself ("8000" becomes 8000)
     
     EXAMPLE:
-    If you set OLLAMA_MODEL=llama2 in your .env file,
-    settings.ollama_model will be "llama2" instead of "mistral"
+    If someone writes OLLAMA_MODEL=llama2 in a note,
+    the program uses llama2 instead of mistral
     """
     
     # -------------------------------------------------------------------------
-    # Project Paths
+    # Where we keep things - Folders!
     # -------------------------------------------------------------------------
-    # BASE_DIR: The root folder of the project
-    # All other paths are relative to this
+    # base_dir: The main folder with everything in it
+    # All other folders are inside this one
     base_dir: Path = Field(
-        default=Path(__file__).parent.parent,  # Goes up from src/ to project root
-        description="Root directory of the project"
+        default=Path(__file__).parent.parent,  # Go up up to the main folder
+        description="The main folder with everything"
     )
     
-    # Where to store uploaded documents temporarily
+    # Where to save files that people give us
     upload_dir: Path = Field(
         default=Path("data/uploads"),
-        description="Directory for uploaded PDF files"
+        description="Folder for files people upload"
     )
     
-    # Where ChromaDB stores its vector database
+    # Where the smart memory box saves its brain-stuff
     vectorstore_dir: Path = Field(
         default=Path("vectorstore"),
-        description="Directory for ChromaDB persistence"
+        description="Folder where the brain box saves things"
     )
     
-    # Where trained ML models are saved
+    # Where we save the smart teachers we made
     models_dir: Path = Field(
         default=Path("models"),
-        description="Directory for saved ML models"
+        description="Folder for the smart teachers"
     )
     
     # -------------------------------------------------------------------------
-    # Ollama / Local LLM Settings
+    # The Smart Helper Settings
     # -------------------------------------------------------------------------
-    # Ollama runs on localhost by default
-    # Change this if running Ollama on a different machine
+    # The smart helper lives on this computer
+    # Change this if the smart helper lives on a different computer
     ollama_base_url: str = Field(
         default="http://localhost:11434",
-        description="Base URL for Ollama API"
+        description="Where to talk to the smart helper"
     )
     
-    # Which model to use - "mistral" is a good balance of speed and quality
-    # Other options: "llama2", "codellama", "mixtral" (needs more RAM)
+    # Which smart helper to use - "mistral" is nice and fast
+    # Other choices: "llama2", "codellama", "mixtral" (needs more memory)
     ollama_model: str = Field(
         default="mistral",
-        description="Ollama model name to use for LLM tasks"
+        description="Which smart helper to talk to"
     )
     
-    # Temperature controls randomness in LLM output
-    # 0.0 = deterministic (same input = same output)
-    # 1.0 = more creative/random
-    # 0.1 = low randomness, good for extraction tasks
+    # How wild or boring the smart helper is
+    # 0.0 = always the same answer
+    # 1.0 = very crazy and different
+    # 0.1 = mostly same answer, safe
     llm_temperature: float = Field(
         default=0.1,
-        description="LLM temperature (0.0-1.0, lower = more deterministic)"
+        description="Wild level (0.0-1.0, small = boring and safe)"
     )
     
-    # Maximum tokens (words/pieces) the LLM can generate
+    # Longest answer the smart helper can give
     llm_max_tokens: int = Field(
         default=2048,
-        description="Maximum tokens for LLM response"
+        description="Max words the smart helper can say"
     )
     
     # -------------------------------------------------------------------------
-    # Embedding Model Settings
+    # How to Turn Words Into Numbers
     # -------------------------------------------------------------------------
-    # sentence-transformers model for creating embeddings
-    # "all-MiniLM-L6-v2" is small (80MB) and fast
-    # For better quality, use "all-mpnet-base-v2" (420MB)
+    # A teacher that turns words into number patterns
+    # "all-MiniLM-L6-v2" is tiny and super fast
+    # For more fancy numbers, use "all-mpnet-base-v2" (bigger)
     embedding_model: str = Field(
         default="all-MiniLM-L6-v2",
-        description="Sentence transformer model for embeddings"
+        description="The teacher that turns words into numbers"
     )
     
-    # Vector dimension - must match the embedding model's output
-    # all-MiniLM-L6-v2 outputs 384-dimensional vectors
+    # How many numbers we use for each word
+    # all-MiniLM-L6-v2 uses 384 numbers for each word
     embedding_dimension: int = Field(
         default=384,
-        description="Dimension of embedding vectors"
+        description="How many numbers for each word"
     )
     
     # -------------------------------------------------------------------------
-    # ChromaDB / RAG Settings
+    # Brain Box Stuff
     # -------------------------------------------------------------------------
-    # Name of the collection storing rate embeddings
+    # The name of the box that saves money number-words
     rates_collection_name: str = Field(
         default="market_rates",
-        description="ChromaDB collection name for rate data"
+        description="The name of the money box"
     )
     
-    # How many similar results to retrieve in RAG queries
-    # More results = more context for LLM, but also more noise
+    # How many close matches to bring back
+    # More matches = more info, but also more clutter
     rag_top_k: int = Field(
         default=5,
-        description="Number of similar documents to retrieve"
+        description="How many close matches to find"
     )
     
-    # Minimum similarity score (0-1) to consider a match relevant
-    # Higher = stricter matching, fewer but better results
+    # How close does it need to match (0-1 scale)
+    # Higher = picky matching, fewer but better matches
     rag_similarity_threshold: float = Field(
         default=0.7,
-        description="Minimum similarity score for RAG retrieval"
+        description="How same does it need to be"
     )
     
     # -------------------------------------------------------------------------
-    # Scoring Thresholds
+    # Passing Scores - Is it Good or Bad?
     # -------------------------------------------------------------------------
-    # These thresholds determine claim verdicts
-    # A claim scoring above 0.7 is considered FAIR
+    # These numbers decide if something is okay
+    # Score above 0.7 = YES it's good!
     fair_threshold: float = Field(
         default=0.7,
-        description="Score above this = FAIR verdict"
+        description="Score above this = GOOD!"
     )
     
-    # A claim scoring below 0.4 is FLAGGED for review
+    # Score below 0.4 = NEEDS CHECKING!
     flagged_threshold: float = Field(
         default=0.4,
-        description="Score below this = FLAGGED verdict"
+        description="Score below this = NEEDS CHECKING!"
     )
     
-    # Between 0.4 and 0.7 = POTENTIALLY_INFLATED
+    # Between 0.4 and 0.7 = MAYBE OKAY
     
     # -------------------------------------------------------------------------
-    # API Settings
+    # How to Talk to the Program Settings
     # -------------------------------------------------------------------------
     api_host: str = Field(
         default="0.0.0.0",
@@ -167,47 +167,47 @@ class Settings(BaseSettings):
         description="Port for the API server"
     )
     
-    # Enable debug mode (more verbose logging)
+    # Show all the secrets and steps (helpful for fixing things)
     debug: bool = Field(
         default=True,
-        description="Enable debug mode"
+        description="Show all the steps and secrets"
     )
     
     # -------------------------------------------------------------------------
-    # Pydantic Settings Configuration
+    # The Smart Rule Checker Setup
     # -------------------------------------------------------------------------
     class Config:
         """
-        Pydantic configuration for settings.
+        Smart rule checker settings.
         
-        env_file: Load variables from .env file
-        env_file_encoding: Use UTF-8 encoding
-        case_sensitive: OLLAMA_MODEL and ollama_model are different
-        extra: ignore unknown env vars (like old AWS settings)
+        env_file: Read notes from the .env file
+        env_file_encoding: Use the right alphabet
+        case_sensitive: BIG_WORD and big_word are different
+        extra: Say no thanks to notes we don't know
         """
         env_file = ".env"
         env_file_encoding = "utf-8"
         case_sensitive = False
-        extra = "ignore"  # Ignore extra env vars not defined in Settings
+        extra = "ignore"  # Don't care about rules we don't know
 
 
 # -----------------------------------------------------------------------------
-# Create a global settings instance
+# Make ONE Copy of All the Rules
 # -----------------------------------------------------------------------------
-# This is the SINGLETON pattern - one settings object used everywhere
-# Import this in other files: from config import settings
+# One copy of the rules for the whole program, everywhere
+# Bring it in: from config import settings
 settings = Settings()
 
 
 # -----------------------------------------------------------------------------
-# Ensure directories exist
+# Make Sure All Folders Are There
 # -----------------------------------------------------------------------------
 def ensure_directories():
     """
-    Create necessary directories if they don't exist.
+    Make all the folders if they're not there yet.
     
-    WHY: Avoids "directory not found" errors when saving files
-    Called once at startup in main.py
+    WHY: So we don't mess up when we save files
+    We do this one time when the program starts
     """
     directories = [
         settings.base_dir / settings.upload_dir,
@@ -220,15 +220,15 @@ def ensure_directories():
 
 
 # -----------------------------------------------------------------------------
-# Helper function to get absolute paths
+# Turn a Shortcut Into a Full Address
 # -----------------------------------------------------------------------------
 def get_absolute_path(relative_path: Path) -> Path:
     """
-    Convert a relative path to absolute path based on project root.
+    Turn a shortcut address into the full real address.
     
     EXAMPLE:
     get_absolute_path(Path("data/rates.csv"))
-    Returns: /home/user/claimnow/data/rates.csv
+    Gives back: /home/user/claimnow/data/rates.csv
     """
     if relative_path.is_absolute():
         return relative_path

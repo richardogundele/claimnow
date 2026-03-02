@@ -382,7 +382,7 @@ class ClaimsPipeline:
         result = self._run_stage(
             result,
             PipelineStage.SCORE,
-            lambda: self.scorer.score(result.extracted_claim, result.rate_match)
+            lambda: self.scorer.score(result.extracted_claim, result.rate_match, claim_id=result.claim_id)
         )
         
         if result.scoring is None:

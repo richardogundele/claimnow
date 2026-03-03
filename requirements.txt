@@ -95,3 +95,4 @@ pytest-asyncio==1.3.0
 # Additional Dependencies (automatically installed)
 # -----------------------------------------------------------------------------
 # See requirements-lock.txt for complete list with all transitive dependencies
+boto3>=1.34.0

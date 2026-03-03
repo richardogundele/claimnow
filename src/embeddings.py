@@ -19,12 +19,14 @@ HOW IT WORKS:
 4. Store vectors in ChromaDB for similarity search
 """
 
+import json
 import logging
 from typing import List, Optional, Union
 from dataclasses import dataclass
 
+import boto3
 import numpy as np
-from sentence_transformers import SentenceTransformer
+from botocore.exceptions import ClientError
 
 # Import from sibling modules using package-relative imports
 from src.config import settings
@@ -50,114 +52,81 @@ class EmbeddingResult:
 
 class EmbeddingModel:
     """
-    Wrapper around sentence-transformers for creating embeddings.
-    
-    USAGE:
-        model = EmbeddingModel()
-        
-        # Single text
-        vector = model.embed("Group C car hire in London")
-        
-        # Multiple texts (more efficient)
-        vectors = model.embed_batch([
-            "BMW 3 Series rental",
-            "Mercedes C-Class hire",
-            "Audi A4 lease"
-        ])
-    
-    WHY SENTENCE-TRANSFORMERS:
-    - Runs locally, no API calls
-    - Models are small enough for laptops (80MB - 500MB)
-    - Produces high-quality embeddings for semantic similarity
+    Wrapper around Amazon Bedrock Titan Embeddings.
     """
     
-    def __init__(self, model_name: Optional[str] = None):
+    def __init__(self, model_id: Optional[str] = None, region: Optional[str] = None):
         """
         Initialize the embedding model.
         
         Args:
-            model_name: HuggingFace model name. Defaults to settings.
-            
-        COMMON MODELS:
-        - "all-MiniLM-L6-v2": Small (80MB), fast, good quality
-        - "all-mpnet-base-v2": Larger (420MB), better quality
-        - "multi-qa-MiniLM-L6-cos-v1": Optimized for Q&A
-        
-        First run downloads the model to ~/.cache/torch/
+            model_id: Amazon Titan model ID. Defaults to settings.
+            region: AWS Region. Defaults to settings.
         """
-        self.model_name = model_name or settings.embedding_model
+        self.model_id = model_id or settings.bedrock_embedding_model_id
+        self.region = region or settings.aws_region
         
-        logger.info(f"Loading embedding model: {self.model_name}")
+        logger.info(f"Loading Bedrock embedding model: {self.model_id} in {self.region}")
         
-        # Load the model - this downloads it on first run
-        # device='cpu' ensures it works without GPU
-        self._model = SentenceTransformer(
-            self.model_name,
-            device='cpu'  # Use CPU (works everywhere, GPU optional)
-        )
+        # Initialize boto3 client for Bedrock Runtime
+        self._client = boto3.client('bedrock-runtime', region_name=self.region)
         
-        # Get the embedding dimension from the model
-        self.dimension = self._model.get_sentence_embedding_dimension()
+        # Get the embedding dimension from config
+        self.dimension = settings.embedding_dimension
         
-        logger.info(f"Model loaded. Embedding dimension: {self.dimension}")
+        logger.info(f"Model loaded. Expected embedding dimension: {self.dimension}")
     
     def embed(self, text: str) -> np.ndarray:
         """
-        Create an embedding for a single text.
-        
-        Args:
-            text: The text to embed
-            
-        Returns:
-            numpy array of shape (dimension,) - e.g., (384,)
-            
-        EXAMPLE:
-            vector = model.embed("Toyota Corolla hire £45/day London")
-            print(vector.shape)  # (384,)
-            print(vector[:5])    # [0.023, -0.156, 0.089, ...]
+        Create an embedding for a single text using Amazon Titan via Bedrock.
         """
-        # encode() returns numpy array
-        embedding = self._model.encode(
-            text,
-            convert_to_numpy=True,
-            normalize_embeddings=True  # Normalize for cosine similarity
-        )
+        # Titan v2 payload format
+        payload = {
+            "inputText": text,
+            "dimensions": self.dimension,
+            "normalize": True
+        }
         
-        return embedding
+        try:
+            response = self._client.invoke_model(
+                modelId=self.model_id,
+                contentType="application/json",
+                accept="application/json",
+                body=json.dumps(payload)
+            )
+            
+            response_body = json.loads(response.get('body').read())
+            embedding = response_body.get('embedding')
+            
+            if not embedding:
+                logger.error("No embedding returned from Bedrock")
+                return np.zeros(self.dimension)
+                
+            return np.array(embedding, dtype=np.float32)
+            
+        except ClientError as e:
+            logger.error(f"Bedrock embedding error: {e}")
+            return np.zeros(self.dimension)
+        except Exception as e:
+            logger.error(f"Unexpected embedding error: {e}")
+            return np.zeros(self.dimension)
     
     def embed_batch(self, texts: List[str], batch_size: int = 32) -> np.ndarray:
         """
         Create embeddings for multiple texts efficiently.
-        
-        WHY BATCH:
-        - Processing multiple texts together is faster
-        - GPU/CPU parallelization
-        - Reduces overhead per text
-        
-        Args:
-            texts: List of texts to embed
-            batch_size: How many to process at once
-            
-        Returns:
-            numpy array of shape (num_texts, dimension)
-            
-        EXAMPLE:
-            texts = ["text1", "text2", "text3"]
-            vectors = model.embed_batch(texts)
-            print(vectors.shape)  # (3, 384)
+        Note: Titan v2 text embeddings currently do not support batching directly in a single invoke_model call.
+        We will process them sequentially here (or you could use ThreadPoolExecutor).
         """
         if not texts:
             return np.array([])
-        
-        embeddings = self._model.encode(
-            texts,
-            batch_size=batch_size,
-            convert_to_numpy=True,
-            normalize_embeddings=True,
-            show_progress_bar=len(texts) > 100  # Show progress for large batches
-        )
-        
-        return embeddings
+            
+        embeddings = []
+        for text in texts:
+            # For large batches in production, add a small delay or use concurrency
+            # to avoid hitting Bedrock TPS limits.
+            embeddings.append(self.embed(text))
+            
+        return np.array(embeddings)
     
     def similarity(self, text1: str, text2: str) -> float:
         """

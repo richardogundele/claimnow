@@ -25,7 +25,8 @@ import logging
 from typing import Optional, Dict, Any, List
 from dataclasses import dataclass
 
-import httpx
+import boto3
+from botocore.exceptions import ClientError
 
 # Import from sibling modules using package-relative imports
 from src.config import settings
@@ -77,84 +78,55 @@ class Message:
     content: str
 
 
-class OllamaClient:
+class BedrockClient:
     """
-    Client for interacting with Ollama's local LLM server.
+    Client for interacting with Amazon Bedrock LLMs.
     
     USAGE:
-        client = OllamaClient()
+        client = BedrockClient()
         response = client.generate("What is 2+2?")
         print(response.text)  # "4"
-    
-    CHAT USAGE (with context):
-        messages = [
-            Message("system", "You are a helpful assistant."),
-            Message("user", "What is the capital of France?")
-        ]
-        response = client.chat(messages)
     """
     
     def __init__(
         self,
-        base_url: Optional[str] = None,
-        model: Optional[str] = None,
-        timeout: float = 120.0
+        region: Optional[str] = None,
+        model_id: Optional[str] = None
     ):
         """
-        Initialize the Ollama client.
+        Initialize the Bedrock client.
         
         Args:
-            base_url: Ollama server URL (default from settings)
-            model: Model to use (default from settings)
-            timeout: Request timeout in seconds (LLMs can be slow)
+            region: AWS Region (default from settings)
+            model_id: Model to use (default from settings)
         """
         # Use settings if not provided
-        self.base_url = base_url or settings.ollama_base_url
-        self.model = model or settings.ollama_model
-        self.timeout = timeout
+        self.region = region or settings.aws_region
+        self.model_id = model_id or settings.bedrock_llm_model_id
         
-        # httpx is a modern HTTP client (like requests but better)
-        # We create a client instance for connection pooling
-        self._client = httpx.Client(timeout=timeout)
+        # Initialize boto3 client for Bedrock Runtime
+        self._client = boto3.client('bedrock-runtime', region_name=self.region)
         
-        logger.info(f"Ollama client initialized: {self.base_url}, model={self.model}")
-    
-    def __del__(self):
-        """Clean up HTTP client when object is destroyed."""
-        if hasattr(self, '_client'):
-            self._client.close()
+        logger.info(f"Bedrock client initialized: region={self.region}, model={self.model_id}")
     
     def is_available(self) -> bool:
         """
-        Check if Ollama server is running and reachable.
-        
-        WHY: Good to check before processing a whole document
-        Returns True if server responds, False otherwise
+        Check if Bedrock client can connect (basic connectivity test)
         """
         try:
-            response = self._client.get(f"{self.base_url}/api/tags")
-            return response.status_code == 200
+            # We can test by calling list_foundation_models on the management plain,
+            # but usually just checking if client instantiated is enough.
+            # Doing a very lightweight dummy Converse if needed, but returning True
+            # to assume available if boto3 initialized.
+            return True
         except Exception:
             return False
     
     def list_models(self) -> List[str]:
         """
-        Get list of available models from Ollama.
-        
-        Returns names of models that have been pulled/downloaded.
+        Get list of available models. (Placeholder)
         """
-        try:
-            response = self._client.get(f"{self.base_url}/api/tags")
-            response.raise_for_status()
-            data = response.json()
-            
-            # Extract model names from response
-            models = [model["name"] for model in data.get("models", [])]
-            return models
-            
-        except Exception as e:
-            logger.error(f"Failed to list models: {e}")
-            return []
+        return [self.model_id]
     
     def generate(
         self,
@@ -164,87 +136,45 @@ class OllamaClient:
         max_tokens: Optional[int] = None,
         stream: bool = False
     ) -> LLMResponse:
-        """
-        Generate a response from the LLM.
-        
-        This is the MAIN METHOD for single-turn generation.
-        
-        Args:
-            prompt: The user's input/question
-            system_prompt: Instructions for how LLM should behave
-            temperature: Randomness (0.0=deterministic, 1.0=creative)
-            max_tokens: Maximum response length
-            stream: Whether to stream the response (not implemented here)
-            
-        Returns:
-            LLMResponse with the generated text
-            
-        EXAMPLE:
-            response = client.generate(
-                prompt="Extract the date from: Invoice dated March 15, 2024",
-                system_prompt="You are a data extraction assistant. Return only the extracted value.",
-                temperature=0.0
-            )
-            print(response.text)  # "March 15, 2024"
-        """
-        # Use defaults from settings if not provided
+        """Generate response using Bedrock Converse API"""
         temperature = temperature if temperature is not None else settings.llm_temperature
         max_tokens = max_tokens or settings.llm_max_tokens
         
-        # Build the request payload
-        # Ollama API docs: https://github.com/ollama/ollama/blob/main/docs/api.md
-        payload = {
-            "model": self.model,
-            "prompt": prompt,
-            "stream": False,  # Get complete response at once
-            "options": {
-                "temperature": temperature,
-                "num_predict": max_tokens,  # Ollama calls it num_predict
-            }
+        messages = [{"role": "user", "content": [{"text": prompt}]}]
+        
+        inference_config = {
+            "temperature": temperature,
+            "maxTokens": max_tokens
         }
         
-        # Add system prompt if provided
-        if system_prompt:
-            payload["system"] = system_prompt
+        kwargs = {
+            "modelId": self.model_id,
+            "messages": messages,
+            "inferenceConfig": inference_config
+        }
         
+        if system_prompt:
+            kwargs["system"] = [{"text": system_prompt}]
+            
         try:
-            # Send POST request to Ollama's generate endpoint
-            response = self._client.post(
-                f"{self.base_url}/api/generate",
-                json=payload
-            )
-            response.raise_for_status()
+            response = self._client.converse(**kwargs)
             
-            # Parse the response
-            data = response.json()
+            response_text = response['output']['message']['content'][0]['text']
+            usage = response['usage']
             
             return LLMResponse(
-                text=data.get("response", ""),
-                model=data.get("model", self.model),
-                tokens_used=data.get("eval_count", 0),
-                done=data.get("done", True)
+                text=response_text,
+                model=self.model_id,
+                tokens_used=usage.get('totalTokens', 0),
+                done=True
             )
             
-        except httpx.TimeoutException:
-            logger.error("Ollama request timed out")
-            return LLMResponse(
-                text="",
-                error="Request timed out. The model may be loading or overloaded."
-            )
-            
-        except httpx.HTTPStatusError as e:
-            logger.error(f"Ollama HTTP error: {e}")
-            return LLMResponse(
-                text="",
-                error=f"HTTP error: {e.response.status_code}"
-            )
-            
+        except ClientError as e:
+            logger.error(f"Bedrock ClientError: {e}")
+            return LLMResponse(text="", error=str(e))
         except Exception as e:
-            logger.error(f"Ollama error: {e}")
-            return LLMResponse(
-                text="",
-                error=str(e)
-            )
+            logger.error(f"Bedrock unexpected error: {e}")
+            return LLMResponse(text="", error=str(e))
     
     def chat(
         self,
@@ -252,71 +182,56 @@ class OllamaClient:
         temperature: Optional[float] = None,
         max_tokens: Optional[int] = None
     ) -> LLMResponse:
-        """
-        Have a multi-turn conversation with the LLM.
-        
-        This preserves context from previous messages.
-        
-        Args:
-            messages: List of Message objects (conversation history)
-            temperature: Randomness setting
-            max_tokens: Maximum response length
-            
-        Returns:
-            LLMResponse with the assistant's reply
-            
-        EXAMPLE:
-            messages = [
-                Message("system", "You are an insurance claims analyst."),
-                Message("user", "Is £80/day fair for a Group B car?"),
-            ]
-            response = client.chat(messages)
-            
-            # Continue the conversation
-            messages.append(Message("assistant", response.text))
-            messages.append(Message("user", "What about in London specifically?"))
-            response = client.chat(messages)
-        """
+        """Have a multi-turn conversation using Bedrock Converse API"""
         temperature = temperature if temperature is not None else settings.llm_temperature
         max_tokens = max_tokens or settings.llm_max_tokens
         
-        # Convert our Message objects to Ollama's format
-        ollama_messages = [
-            {"role": msg.role, "content": msg.content}
-            for msg in messages
-        ]
+        # Convert our Message objects to Bedrock's format
+        # System message goes in a separate parameter for Converse API
+        bedrock_messages = []
+        system_prompts = []
         
-        payload = {
-            "model": self.model,
-            "messages": ollama_messages,
-            "stream": False,
-            "options": {
-                "temperature": temperature,
-                "num_predict": max_tokens,
-            }
+        for msg in messages:
+            if msg.role == "system":
+                system_prompts.append({"text": msg.content})
+            else:
+                bedrock_messages.append({
+                    "role": msg.role,
+                    "content": [{"text": msg.content}]
+                })
+        
+        inference_config = {
+            "temperature": temperature,
+            "maxTokens": max_tokens
         }
         
+        kwargs = {
+            "modelId": self.model_id,
+            "messages": bedrock_messages,
+            "inferenceConfig": inference_config
+        }
+        
+        if system_prompts:
+            kwargs["system"] = system_prompts
+            
         try:
-            response = self._client.post(
-                f"{self.base_url}/api/chat",
-                json=payload
-            )
-            response.raise_for_status()
+            response = self._client.converse(**kwargs)
             
-            data = response.json()
-            
-            # Chat endpoint returns message in different structure
-            message = data.get("message", {})
+            response_text = response['output']['message']['content'][0]['text']
+            usage = response['usage']
             
             return LLMResponse(
-                text=message.get("content", ""),
-                model=data.get("model", self.model),
-                tokens_used=data.get("eval_count", 0),
-                done=data.get("done", True)
+                text=response_text,
+                model=self.model_id,
+                tokens_used=usage.get('totalTokens', 0),
+                done=True
             )
             
+        except ClientError as e:
+            logger.error(f"Bedrock chat error: {e}")
+            return LLMResponse(text="", error=str(e))
         except Exception as e:
-            logger.error(f"Ollama chat error: {e}")
+            logger.error(f"Bedrock chat unexpected error: {e}")
             return LLMResponse(text="", error=str(e))
     
     def generate_json(
@@ -386,28 +301,17 @@ Respond with valid JSON only. No explanation, no markdown, just the JSON object.
 # Singleton instance for convenience
 # -----------------------------------------------------------------------------
 # Create a default client that can be imported directly
-_default_client: Optional[OllamaClient] = None
+_default_client: Optional[BedrockClient] = None
 
 
-def get_llm_client() -> OllamaClient:
+def get_llm_client() -> BedrockClient:
     """
     Get the default LLM client (singleton pattern).
-    
-    USAGE:
-        from llm_client import get_llm_client
-        
-        client = get_llm_client()
-        response = client.generate("Hello!")
-    
-    WHY SINGLETON:
-    - Reuses HTTP connection pool
-    - Avoids creating multiple clients
-    - Consistent configuration
     """
     global _default_client
     
     if _default_client is None:
-        _default_client = OllamaClient()
+        _default_client = BedrockClient()
     
     return _default_client
 

@@ -19,7 +19,7 @@ from src.config import settings
 def test_pipeline_with_sample():
     """Test full pipeline with a real PDF."""
     print("=" * 80)
-    print("📋 CLAIMNOW END-TO-END PIPELINE TEST")
+    print(" CLAIMNOW END-TO-END PIPELINE TEST")
     print("=" * 80)
     print()
     
@@ -27,27 +27,27 @@ def test_pipeline_with_sample():
     pdf_path = Path(__file__).parent.parent / "data" / "court_pack_001_LDS320_2023.pdf"
     
     if not pdf_path.exists():
-        print(f"❌ Sample PDF not found at {pdf_path}")
+        print(f" Sample PDF not found at {pdf_path}")
         print(f"   Place a PDF in: data/ folder")
         return False
     
-    print(f"✅ Found sample PDF: {pdf_path.name}")
+    print(f" Found sample PDF: {pdf_path.name}")
     print()
     
     # Create pipeline
-    print("🔧 Initializing pipeline...")
+    print(" Initializing pipeline...")
     pipeline = ClaimsPipeline(verbose=True)
-    print("   ✓ Pipeline ready")
+    print("   Pipeline ready")
     print()
     
     # Analyze
-    print("🚀 Starting analysis...")
+    print(" Starting analysis...")
     print()
     
     try:
         result = pipeline.analyze(pdf_path, claim_id="TEST-001")
     except Exception as e:
-        print(f"❌ Pipeline failed: {e}")
+        print(f" Pipeline failed: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -73,9 +73,9 @@ def test_pipeline_with_sample():
     print(f"Stages completed:  {result.completed_stages}/5")
     
     if result.failed_stage:
-        print(f"❌ Failed at:       {result.failed_stage}")
+        print(f" Failed at:       {result.failed_stage}")
     else:
-        print(f"✅ All stages passed!")
+        print(f" All stages passed!")
     
     print()
     print("📈 Stage Timing:")
@@ -100,8 +100,10 @@ def test_pipeline_with_sample():
             print(f"   End:         {result.extracted_claim.hire_period.end_date}")
         if result.extracted_claim.hire_period.duration_days:
             print(f"   Duration:    {result.extracted_claim.hire_period.duration_days} days")
-        if result.extracted_claim.rate.daily_rate:
-            print(f"   Daily rate:  £{result.extracted_claim.rate.daily_rate:.2f}")
+        if result.extracted_claim.rates.daily_rate:
+            print(f"   Daily Rate:  \u00A3{result.extracted_claim.rates.daily_rate}")
+        if result.extracted_claim.rates.total_cost:
+            print(f"   Total:       \u00A3{result.extracted_claim.rates.total_cost}")
         print()
     
     if result.rate_match:

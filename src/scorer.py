@@ -40,7 +40,7 @@ import uuid
 # Import from sibling modules using package-relative imports
 from src.extractor import ExtractedClaim
 from src.rate_matcher import RateMatchResult, RateComparison
-from src.llm_client import OllamaClient, get_llm_client, Message
+from src.llm_client import BedrockClient, get_llm_client, Message
 from src.config import settings, get_absolute_path
 
 # Set up logging
@@ -213,7 +213,7 @@ class ClaimScorer:
     5. Show the evidence (which docs helped decide)
     """
     
-    def __init__(self, llm_client: Optional[OllamaClient] = None):
+    def __init__(self, llm_client: Optional[BedrockClient] = None):
         """
         Start up the scorer.
         

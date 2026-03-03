@@ -1,0 +1,40 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.7, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\ogund\AppData\Local\Programs\Python\Python313\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\ogund\Downloads\AgenticProjects\claimnow
+plugins: anyio-4.12.1, langsmith-0.7.11, asyncio-1.3.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 1 item
+
+tests/test_pipeline_e2e.py::test_pipeline_with_sample ================================================================================
+FAILED
+
+================================== FAILURES ===================================
+__________________________ test_pipeline_with_sample __________________________
+
+    def test_pipeline_with_sample():
+        """Test full pipeline with a real PDF."""
+        print("=" * 80)
+>       print("\U0001f4cb CLAIMNOW END-TO-END PIPELINE TEST")
+
+tests\test_pipeline_e2e.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <encodings.cp1252.IncrementalEncoder object at 0x000002AAB6EB4AD0>
+input = '\U0001f4cb CLAIMNOW END-TO-END PIPELINE TEST', final = False
+
+    def encode(self, input, final=False):
+>       return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f4cb' in position 0: character maps to <undefined>
+
+..\..\..\AppData\Local\Programs\Python\Python313\Lib\encodings\cp1252.py:19: UnicodeEncodeError
+============================== warnings summary ===============================
+src\config.py:23
+  C:\Users\ogund\Downloads\AgenticProjects\claimnow\src\config.py:23: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class Settings(BaseSettings):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_pipeline_e2e.py::test_pipeline_with_sample - UnicodeEncodeE...
+======================== 1 failed, 1 warning in 2.47s =========================

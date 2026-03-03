@@ -35,7 +35,7 @@ from datetime import datetime, date
 from dateutil import parser as date_parser
 
 # Import from sibling modules using package-relative imports
-from src.llm_client import OllamaClient, get_llm_client
+from src.llm_client import BedrockClient, get_llm_client
 from src.config import settings
 
 # Set up logging
@@ -192,12 +192,12 @@ class ClaimExtractor:
     4. Convert to ExtractedClaim dataclass
     """
     
-    def __init__(self, llm_client: Optional[OllamaClient] = None):
+    def __init__(self, llm_client: Optional[BedrockClient] = None):
         """
         Initialize the extractor.
         
         Args:
-            llm_client: LLM client to use (default: Ollama)
+            llm_client: LLM client to use (default: Bedrock)
         """
         self.llm_client = llm_client or get_llm_client()
         

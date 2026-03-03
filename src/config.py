@@ -64,20 +64,18 @@ class Settings(BaseSettings):
     )
     
     # -------------------------------------------------------------------------
-    # The Smart Helper Settings
+    # The Smart Helper Settings (AWS Bedrock)
     # -------------------------------------------------------------------------
-    # The smart helper lives on this computer
-    # Change this if the smart helper lives on a different computer
-    ollama_base_url: str = Field(
-        default="http://localhost:11434",
-        description="Where to talk to the smart helper"
+    # The AWS Region where Bedrock is located
+    aws_region: str = Field(
+        default="us-east-1",
+        description="Region where AWS Bedrock is located"
     )
     
-    # Which smart helper to use - "mistral" is nice and fast
-    # Other choices: "llama2", "codellama", "mixtral" (needs more memory)
-    ollama_model: str = Field(
-        default="mistral",
-        description="Which smart helper to talk to"
+    # Which smart helper to use on Bedrock - Claude 3 Haiku is nice and fast
+    bedrock_llm_model_id: str = Field(
+        default="anthropic.claude-3-haiku-20240307-v1:0",
+        description="Which smart helper to talk to on Bedrock"
     )
     
     # How wild or boring the smart helper is
@@ -96,20 +94,18 @@ class Settings(BaseSettings):
     )
     
     # -------------------------------------------------------------------------
-    # How to Turn Words Into Numbers
+    # How to Turn Words Into Numbers (Amazon Titan)
     # -------------------------------------------------------------------------
     # A teacher that turns words into number patterns
-    # "all-MiniLM-L6-v2" is tiny and super fast
-    # For more fancy numbers, use "all-mpnet-base-v2" (bigger)
-    embedding_model: str = Field(
-        default="all-MiniLM-L6-v2",
-        description="The teacher that turns words into numbers"
+    bedrock_embedding_model_id: str = Field(
+        default="amazon.titan-embed-text-v2:0",
+        description="The teacher on Bedrock that turns words into numbers"
     )
     
     # How many numbers we use for each word
-    # all-MiniLM-L6-v2 uses 384 numbers for each word
+    # Titan v2 default depends on the dimension argument sent, assuming 512 for balance
     embedding_dimension: int = Field(
-        default=384,
+        default=512,
         description="How many numbers for each word"
     )
     

@@ -1,0 +1,37 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.7, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\ogund\AppData\Local\Programs\Python\Python313\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\ogund\Downloads\AgenticProjects\claimnow
+plugins: anyio-4.12.1, langsmith-0.7.11, asyncio-1.3.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 1 item
+
+tests/test_pipeline_e2e.py::test_pipeline_with_sample PASSED             [100%]
+
+============================== warnings summary ===============================
+src\config.py:23
+  C:\Users\ogund\Downloads\AgenticProjects\claimnow\src\config.py:23: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class Settings(BaseSettings):
+
+tests/test_pipeline_e2e.py::test_pipeline_with_sample
+tests/test_pipeline_e2e.py::test_pipeline_with_sample
+tests/test_pipeline_e2e.py::test_pipeline_with_sample
+  C:\Users\ogund\Downloads\AgenticProjects\claimnow\src\scorer.py:135: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp: str = field(default_factory=lambda: datetime.utcnow().isoformat())  # When
+
+tests/test_pipeline_e2e.py::test_pipeline_with_sample
+  C:\Users\ogund\Downloads\AgenticProjects\claimnow\src\scorer.py:246: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    start_time = datetime.utcnow()
+
+tests/test_pipeline_e2e.py::test_pipeline_with_sample
+  C:\Users\ogund\Downloads\AgenticProjects\claimnow\src\scorer.py:252: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    audit_log.decision_latency_ms = (datetime.utcnow() - start_time).total_seconds() * 1000
+
+tests/test_pipeline_e2e.py::test_pipeline_with_sample
+  C:\Users\ogund\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\python.py:170: PytestReturnNotNoneWarning: Test functions should return None, but tests/test_pipeline_e2e.py::test_pipeline_with_sample returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 1 passed, 7 warnings in 12.31s ========================

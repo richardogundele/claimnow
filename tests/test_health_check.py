@@ -4,7 +4,7 @@ Health Check - Verify all components are working
 Checks:
 ✓ Python environment
 ✓ Configuration loaded
-✓ Ollama available
+✓ Bedrock LLM available
 ✓ Vector store accessible
 ✓ Models loadable
 """
@@ -30,8 +30,9 @@ def check_config():
     try:
         from src.config import settings
         print(f"   ✓ Base dir: {settings.base_dir}")
-        print(f"   ✓ Ollama: {settings.ollama_base_url}")
-        print(f"   ✓ Model: {settings.ollama_model}")
+        print(f"   ✓ AWS Region: {settings.aws_region}")
+        print(f"   ✓ LLM Model: {settings.bedrock_llm_model_id}")
+        print(f"   ✓ Embedding Model: {settings.bedrock_embedding_model_id}")
         print(f"   ✓ Vectorstore: {settings.vectorstore_dir}")
         return True
     except Exception as e:
@@ -39,27 +40,27 @@ def check_config():
         return False
 
 
-def check_ollama():
-    """Check Ollama is running."""
-    print("\n🤖 Ollama LLM")
+def check_bedrock():
+    """Check Amazon Bedrock."""
+    print("\n🤖 Bedrock LLM")
     try:
         from src.llm_client import get_llm_client
         client = get_llm_client()
         
-        # Try a simple query
-        print(f"   Testing connection to {client.base_url}...")
-        response = client.generate("Say 'working'")
+        # Try a simple connectivity check
+        print(f"   Testing connection to Bedrock in {client.region}...")
+        is_avail = client.is_available()
         
-        if response.success:
-            print(f"   ✓ Ollama is running")
-            print(f"   ✓ Model: {client.model}")
+        if is_avail:
+            print(f"   ✓ Bedrock client initialized")
+            print(f"   ✓ Model: {client.model_id}")
             return True
         else:
-            print(f"   ✗ Ollama error: {response.error}")
+            print(f"   ✗ Bedrock error: unable to connect")
             return False
     except Exception as e:
-        print(f"   ✗ Ollama not available: {e}")
-        print(f"   💡 Start Ollama with: ollama serve")
+        print(f"   ✗ Bedrock not available: {e}")
+        print(f"   💡 Ensure AWS credentials are set up")
         return False
 
 
@@ -74,7 +75,7 @@ def check_embeddings():
         test_text = "test document"
         embedding = model.embed(test_text)
         
-        print(f"   ✓ Model loaded: {model.model_name}")
+        print(f"   ✓ Model loaded: {model.model_id}")
         print(f"   ✓ Dimension: {embedding.shape[0]}")
         return True
     except Exception as e:
@@ -189,7 +190,7 @@ def main():
         ("Rate Matcher", check_rate_matcher),
         ("Scorer (RAG)", check_scorer),
         ("Full Pipeline", check_pipeline),
-        ("Ollama LLM", check_ollama),  # Last because it requires running service
+        ("Bedrock LLM", check_bedrock),
     ]
     
     results = {}
@@ -220,8 +221,8 @@ def main():
         return 0
     elif passed >= total - 1:
         print(f"\n⚠️  {total - passed} component needs attention")
-        if not results.get("Ollama LLM"):
-            print("   💡 Start Ollama: ollama serve")
+        if not results.get("Bedrock LLM"):
+            print("   💡 Check your AWS credentials (aws configure)")
         return 0
     else:
         print(f"\n❌ {total - passed} components failing")

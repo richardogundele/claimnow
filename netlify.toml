@@ -1,0 +1,22 @@
+[build]
+  base = "frontend"
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+  
+[[redirects]]
+  # Redirect API requests to the deployed AWS App Runner URL
+  # (You will need to set API_BASE_URL environment variable in Netlify)
+  from = "/api/*"
+  to = "https://:API_BASE_URL/api/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  # Redirect all other traffic to index.html for React Router
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = false

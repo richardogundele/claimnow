@@ -40,8 +40,10 @@ function App() {
         formData.append('file', file);
 
         try {
-            // Determine API URL (default to local FastAPI port 8000 or relative proxy)
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+            // In production (Netlify), use relative URLs — Netlify proxies /analyze/*
+            // to the Render backend via netlify.toml redirect rules.
+            // In local dev, set VITE_API_URL=http://localhost:8000 in frontend/.env.local
+            const apiUrl = import.meta.env.VITE_API_URL || '';
 
             const response = await fetch(`${apiUrl}/analyze/upload`, {
                 method: 'POST',

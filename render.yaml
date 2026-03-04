@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: claimnow-backend
+    env: docker
+    region: ohio
+    plan: free
+    branch: main
+    healthCheckPath: /health
+    envVars:
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_DEFAULT_REGION
+        value: eu-west-2
+      - key: ALLOWED_ORIGINS
+        value: "*"

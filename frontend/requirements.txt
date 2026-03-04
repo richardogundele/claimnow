@@ -1,2 +1,0 @@
-# (Intentionally empty)
-# No Python dependencies needed for static frontend deployment on Netlify.

@@ -57,7 +57,7 @@ class HealthResponse(BaseModel):
     """Response model for health check endpoint."""
     status: str = "healthy"
     version: str = "2.0.0"
-    ollama_available: bool = False
+    bedrock_available: bool = False
     vectorstore_count: int = 0
     timestamp: str = ""
 
@@ -173,12 +173,12 @@ async def startup_event():
     # Initialize RAG pipeline
     rag = RAGPipeline()
     
-    # Check Ollama availability
+    # Check Bedrock availability
     llm = get_llm_client()
     if llm.is_available():
-        logger.info(f"Ollama is available with model: {settings.ollama_model}")
+        logger.info(f"Bedrock is available with model: {settings.bedrock_llm_model_id}")
     else:
-        logger.warning("Ollama is not available - LLM features will fail")
+        logger.warning("Bedrock is not available - LLM features will fail")
     
     # Log vector store status
     store = get_rates_store()
@@ -203,7 +203,7 @@ async def health_check():
     return HealthResponse(
         status="healthy",
         version="2.0.0",
-        ollama_available=llm.is_available(),
+        bedrock_available=llm.is_available(),
         vectorstore_count=store.count,
         timestamp=datetime.now().isoformat()
     )
@@ -478,15 +478,15 @@ async def get_rate_stats():
 @app.get("/models", tags=["System"])
 async def list_models():
     """
-    List available Ollama models.
+    List active Bedrock models.
     """
     llm = get_llm_client()
     models = llm.list_models()
     
     return JSONResponse(content={
-        "current_model": settings.ollama_model,
+        "current_model": settings.bedrock_llm_model_id,
         "available_models": models,
-        "ollama_available": llm.is_available()
+        "bedrock_available": llm.is_available()
     })
 
 
@@ -496,8 +496,8 @@ async def get_config():
     Get current configuration (non-sensitive values).
     """
     return JSONResponse(content={
-        "ollama_model": settings.ollama_model,
-        "embedding_model": settings.embedding_model,
+        "bedrock_llm_model": settings.bedrock_llm_model_id,
+        "bedrock_embedding_model": settings.bedrock_embedding_model_id,
         "rag_top_k": settings.rag_top_k,
         "fair_threshold": settings.fair_threshold,
         "flagged_threshold": settings.flagged_threshold,

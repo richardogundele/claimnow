@@ -7,10 +7,11 @@
   NODE_VERSION = "20"
   
 [[redirects]]
-  # Redirect API requests to the deployed AWS App Runner URL
-  # (You will need to set API_BASE_URL environment variable in Netlify)
+  # Proxy /api/* requests to the Render backend to avoid CORS issues.
+  # IMPORTANT: After first Render deploy, confirm your service URL and update this.
+  # Render assigns: https://claimnow-backend.onrender.com (based on service name in render.yaml)
   from = "/api/*"
-  to = "https://:API_BASE_URL/api/:splat"
+  to = "https://claimnow-backend.onrender.com/api/:splat"
   status = 200
   force = true
 

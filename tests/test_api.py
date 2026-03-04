@@ -38,7 +38,7 @@ def test_api_endpoints():
         data = response.json()
         print(f"   Status: {data.get('status')}")
         print(f"   Version: {data.get('version')}")
-        print(f"   Ollama: {data.get('ollama_available')}")
+        print(f"   Bedrock: {data.get('bedrock_available')}")
         print(f"   ✓ Health check passed")
     else:
         print(f"   ✗ Failed: {response.text}")

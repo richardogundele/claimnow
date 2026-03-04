@@ -1,23 +1,22 @@
 """
-llm_client.py - Local LLM Interface via Ollama
+llm_client.py - LLM Interface via Amazon Bedrock
 
 WHY THIS FILE EXISTS:
-- Provides a clean interface to the local LLM (Ollama)
-- Abstracts away HTTP calls so other code just calls llm.generate()
-- Handles retries, timeouts, and error handling
-- Can be swapped for different LLM backends (OpenAI, Anthropic) easily
+- Provides a clean interface to the AWS Bedrock LLM
+- Abstracts away boto3 calls so other code just calls llm.generate()
+- Handles errors and retries
+- Can be swapped for different LLM backends easily
 
-WHAT IS OLLAMA:
-- Ollama is a tool that runs LLMs locally on your machine
-- It downloads models (Mistral, Llama, etc.) and serves them via HTTP
-- Default runs on http://localhost:11434
-- No API keys needed, no data sent to cloud
+WHAT IS AMAZON BEDROCK:
+- Bedrock is AWS's managed AI service
+- Gives access to foundation models (Claude, Titan, etc.) via API
+- Credentials are read from environment variables (AWS_ACCESS_KEY_ID etc.)
+- All calls go to the AWS cloud — no local model installation needed
 
-HOW TO USE OLLAMA:
-1. Install: https://ollama.ai
-2. Pull a model: ollama pull mistral
-3. It automatically starts a server on port 11434
-4. This code sends HTTP requests to that server
+HOW TO USE:
+1. Set AWS credentials as environment variables or IAM role
+2. Set BEDROCK_LLM_MODEL_ID in your .env (default: claude-haiku-4-5)
+3. This code uses the Bedrock Converse API for all LLM calls
 """
 
 import json

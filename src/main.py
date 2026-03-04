@@ -131,7 +131,7 @@ app = FastAPI(
     - Querying market rates using RAG
     - Managing the rate database
     
-    Built with Local ML: Ollama + ChromaDB + scikit-learn
+    Built with AWS Bedrock (Claude/Titan) + ChromaDB + scikit-learn
     """,
     version="2.0.0",
     docs_url="/docs",      # Swagger UI

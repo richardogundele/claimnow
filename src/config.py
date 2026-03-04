@@ -31,8 +31,8 @@ class Settings(BaseSettings):
     4. Change it to the right type by itself ("8000" becomes 8000)
     
     EXAMPLE:
-    If someone writes OLLAMA_MODEL=llama2 in a note,
-    the program uses llama2 instead of mistral
+    If someone writes BEDROCK_LLM_MODEL_ID=anthropic.claude-haiku-4-5-20251001-v1:0 in a note,
+    the program uses that model instead of the default claude-haiku-4-5
     """
     
     # -------------------------------------------------------------------------
@@ -72,9 +72,9 @@ class Settings(BaseSettings):
         description="Region where AWS Bedrock is located"
     )
     
-    # Which smart helper to use on Bedrock - Claude 3 Haiku is nice and fast
+    # Which smart helper to use on Bedrock - Claude Haiku 4.5 with hybrid reasoning
     bedrock_llm_model_id: str = Field(
-        default="anthropic.claude-3-haiku-20240307-v1:0",
+        default="anthropic.claude-haiku-4-5-20251001-v1:0",
         description="Which smart helper to talk to on Bedrock"
     )
     

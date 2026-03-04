@@ -12,6 +12,6 @@ services:
       - key: AWS_SECRET_ACCESS_KEY
         sync: false
       - key: AWS_DEFAULT_REGION
-        value: eu-west-2
+        value: us-east-1
       - key: ALLOWED_ORIGINS
         value: "*"

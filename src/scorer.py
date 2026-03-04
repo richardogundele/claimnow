@@ -3,7 +3,7 @@ scorer.py - RAG-Based Claim Scoring with Evidence
 
 WHY THIS FILE EXISTS:
 - Score insurance claims using context from similar cases
-- Use LLM (local Ollama) to make decisions based on market context
+- Use LLM (AWS Bedrock) to make decisions based on market context
 - Show evidence: which market rates support the decision
 - Scale to 65M unstructured documents using RAG
 

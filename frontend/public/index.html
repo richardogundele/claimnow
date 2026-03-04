@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClaimNow - Insurance Claim Analysis</title>
+  <meta name="description" content="AI-powered insurance claim analysis. Upload your claim or enter details to get a fair, explainable verdict instantly." />
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/justice.svg" alt="ClaimNow Logo" style="width:64px;height:64px;margin-bottom:1rem;filter:grayscale(0.2) brightness(0.8);">
+      <div class="logo">ClaimNow</div>
+      <div class="subtitle">AI-powered Insurance Claim Analysis<br><span style="font-size:1.08rem;font-weight:400;">Built for transparency, fairness, and trust.</span></div>
+    </section>
+    <section class="card" aria-label="Claim Analysis Form">
+      <form id="claim-form" autocomplete="off" aria-describedby="form-desc">
+        <label for="claimText">Paste claim details <span style="color:#dc2626;">*</span></label>
+        <textarea id="claimText" name="claimText" rows="7" placeholder="e.g. CREDIT HIRE INVOICE\nVehicle: BMW 320d (Group D)\nDaily Rate: £65.00\nHire Period: 14 days" required aria-required="true"></textarea>
+        <button type="submit" id="analyzeBtn" aria-label="Analyze Claim">Analyze Claim</button>
+      </form>
+      <div id="result" style="display:none;">
+        <div class="verdict" id="verdict"></div>
+        <div class="evidence" id="evidence"></div>
+      </div>
+      <div id="loading" class="loading" style="display:none;">Analyzing...</div>
+      <div id="error"></div>
+    </section>
+    <div class="footer">
+      <span style="font-weight:600;">&copy; 2026 ClaimNow</span> &mdash; Powered by AI. <span style="color:#2563eb;">For Government &amp; Industry.</span>
+    </div>
+  </main>
+  <script>
+    const form = document.getElementById('claim-form');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const resultDiv = document.getElementById('result');
+    const verdictDiv = document.getElementById('verdict');
+    const evidenceDiv = document.getElementById('evidence');
+    const loadingDiv = document.getElementById('loading');
+    const errorDiv = document.getElementById('error');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      resultDiv.style.display = 'none';
+      errorDiv.textContent = '';
+      loadingDiv.style.display = 'block';
+      analyzeBtn.disabled = true;
+      try {
+        const text = document.getElementById('claimText').value;
+        const res = await fetch('/api/analyze-text', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
+        });
+        const data = await res.json();
+        loadingDiv.style.display = 'none';
+        analyzeBtn.disabled = false;
+        if (!res.ok) {
+          errorDiv.textContent = data.detail || 'Analysis failed.';
+          return;
+        }
+        verdictDiv.textContent = `Verdict: ${data.verdict?.decision || 'N/A'} (Confidence: ${Math.round((data.verdict?.confidence || 0)*100)}%)`;
+        evidenceDiv.textContent = data.reasoning?.llm_analysis || 'No explanation available.';
+        resultDiv.style.display = 'block';
+      } catch (err) {
+        loadingDiv.style.display = 'none';
+        analyzeBtn.disabled = false;
+        errorDiv.textContent = 'Error connecting to backend.';
+      }
+    });
+  </script>
+</body>
+</html>

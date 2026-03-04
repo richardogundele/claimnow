@@ -1,0 +1,113 @@
+body {
+  background: linear-gradient(135deg, #f8fafc 0%, #e0e7ef 100%);
+  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+  color: #1e293b;
+}
+.hero {
+  text-align: center;
+  padding: 3.5rem 1rem 1.5rem 1rem;
+}
+.logo {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -1px;
+  margin-bottom: 0.5rem;
+}
+.subtitle {
+  color: #334155;
+  font-size: 1.3rem;
+  margin-bottom: 2.5rem;
+  font-weight: 500;
+}
+.card {
+  max-width: 480px;
+  margin: 2.5rem auto;
+  padding: 2.5rem 2.5rem 2rem 2.5rem;
+  background: #fff;
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 32px #0002;
+  border: 1px solid #e2e8f0;
+}
+label {
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 0.5rem;
+}
+textarea {
+  width: 100%;
+  border-radius: 0.7rem;
+  border: 1.5px solid #cbd5e1;
+  padding: 1rem;
+  font-size: 1.1rem;
+  margin-bottom: 1.2rem;
+  background: #f1f5f9;
+  resize: vertical;
+  min-height: 120px;
+  transition: border 0.2s;
+}
+textarea:focus {
+  border: 1.5px solid #2563eb;
+  outline: none;
+}
+button[type="submit"] {
+  width: 100%;
+  background: linear-gradient(90deg, #2563eb 0%, #0ea5e9 100%);
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 0.7rem;
+  padding: 0.9rem 0;
+  margin-top: 0.2rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px #2563eb22;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+button[type="submit"]:hover {
+  background: linear-gradient(90deg, #0ea5e9 0%, #2563eb 100%);
+  box-shadow: 0 4px 16px #2563eb33;
+}
+.footer {
+  text-align: center;
+  color: #64748b;
+  font-size: 1.05rem;
+  margin-top: 3.5rem;
+  font-weight: 500;
+}
+.verdict {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-top: 1.7rem;
+  color: #2563eb;
+}
+.evidence {
+  font-size: 1.05rem;
+  color: #334155;
+  margin-top: 0.7rem;
+  background: #f1f5f9;
+  border-radius: 0.6rem;
+  padding: 0.7rem 1rem;
+  margin-bottom: 0.5rem;
+}
+.loading {
+  color: #0ea5e9;
+  font-weight: 600;
+  margin-top: 1.2rem;
+}
+#error {
+  color: #dc2626;
+  margin-top: 1.2rem;
+  font-weight: 600;
+}
+@media (max-width: 600px) {
+  .card {
+    padding: 1.2rem 0.7rem 1rem 0.7rem;
+  }
+  .logo {
+    font-size: 2.1rem;
+  }
+  .subtitle {
+    font-size: 1.05rem;
+  }
+}

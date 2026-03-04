@@ -19,7 +19,7 @@ WHY RAG INSTEAD OF FINE-TUNING:
 
 COMPONENTS USED:
 - VectorStore: For retrieving similar documents
-- OllamaClient: For LLM generation
+- BedrockClient: For LLM generation
 - Prompts: Carefully crafted instructions for the LLM
 """
 
@@ -28,7 +28,7 @@ from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, field
 
 # Import from sibling modules using package-relative imports
-from src.llm_client import OllamaClient, get_llm_client, Message
+from src.llm_client import BedrockClient, get_llm_client, Message
 from src.vector_store import VectorStore, get_rates_store, SearchResult
 from src.config import settings
 
@@ -98,7 +98,7 @@ class RAGPipeline:
     def __init__(
         self,
         vector_store: Optional[VectorStore] = None,
-        llm_client: Optional[OllamaClient] = None,
+        llm_client: Optional[BedrockClient] = None,
         top_k: int = None,
         min_similarity: float = None
     ):
@@ -107,7 +107,7 @@ class RAGPipeline:
         
         Args:
             vector_store: Vector store for retrieval (default: rates store)
-            llm_client: LLM client for generation (default: Ollama)
+            llm_client: LLM client for generation (default: Bedrock)
             top_k: Number of documents to retrieve
             min_similarity: Minimum similarity threshold
         """

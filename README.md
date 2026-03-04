@@ -279,22 +279,3 @@ Orchestrates all components into one workflow.
 FastAPI endpoints for the frontend to call.
 
 ---
-
-## Interview Talking Points
-
-**On Local ML vs Cloud:**
-> "I chose to run models locally because Whichrate handles sensitive insurance data. Local deployment means data never leaves the network, there are no per-query API costs, and we can fine-tune models on domain-specific terminology. The architecture uses Ollama for LLM inference and ChromaDB for vector search - both run entirely on-premise."
-
-**On RAG:**
-> "Rather than fine-tuning an LLM on 65 million rates - which would be expensive and inflexible - I implemented RAG. The rates are embedded in a vector database. When analysing a claim, we retrieve the most relevant rates and pass them as context to the LLM. This means the model always uses current data without retraining."
-
-**On the Tech Stack:**
-> "I used LangChain for LLM orchestration, ChromaDB for vector storage, and scikit-learn for the classification model. SHAP provides explainability - critical in insurance where decisions must be justified. The whole system runs on a standard laptop without GPU."
-
----
-
-## Contact
-
-**Richard Ademola Ogundele**  
-Email: Ogundelerichard27@gmail.com  
-
